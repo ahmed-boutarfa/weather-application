@@ -12,25 +12,31 @@ import "./App.css";
 function App() {
   const [weather, setWeather] = useState(null);
   const [error, setError] = useState(null);
-  const [isLoading, setIsLoading] = useState(false);
+  //const [isLoading, setIsLoading] = useState(false);
   const [query, setQuery] = useState("");
   const [lastCoords, setLastCoords] = useState(null);
   const [location, setLocation] = useState("");
 
-  const { unitSystem } = useContext(UnitsContext);
+  const { unitSystem, selectedUnits } = useContext(UnitsContext);
 
   async function fetchWeather(lat, lon, cityName = "") {
-    setIsLoading(true);
+    //setIsLoading(true);
     setError(null);
     try {
-      const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true&hourly=temperature_2m,weather_code,precipitation_probability,precipitation,apparent_temperature,relative_humidity_2m&daily=temperature_2m_max,temperature_2m_min,precipitation_sum,windspeed_10m_max,weather_code&timezone=auto${
-        unitSystem === "imperial"
-          ? "&temperature_unit=fahrenheit&windspeed_unit=mph&precipitation_unit=inch"
-          : "&temperature_unit=celsius&windspeed_unit=kmh&precipitation_unit=mm"
-      }`;
+      let unitsParams = `&temperature_unit=${selectedUnits.temperature}&windspeed_unit=${selectedUnits.wind}&precipitation_unit=${selectedUnits.precipitation}`;
+/*
+      if (unitSystem === "imperial") {
+        unitsParams = "&temperature_unit=fahrenheit&windspeed_unit=mph&precipitation_unit=inch";
+      } else if (unitSystem === "metric") {
+        unitsParams = "&temperature_unit=celsius&windspeed_unit=kmh&precipitation_unit=mm";
+      } else {
+        unitsParams = `&temperature_unit=${selectedUnits.temperature}&windspeed_unit=${selectedUnits.wind}&precipitation_unit=${selectedUnits.precipitation}`;
+      }*/
+      
+      const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true&hourly=temperature_2m,weather_code,precipitation_probability,precipitation,apparent_temperature,relative_humidity_2m&daily=temperature_2m_max,temperature_2m_min,precipitation_sum,windspeed_10m_max,weather_code&timezone=auto${unitsParams}`;
+      console.log(unitsParams)
       const res = await fetch(url);
       const data = await res.json();
-      console.log(data);
       setWeather(data);
       setLastCoords({ lat, lon });
       
@@ -69,7 +75,7 @@ function App() {
     } catch (err) {
       setError("API error");
     } finally {
-      setIsLoading(false);
+      //setIsLoading(false);
     }
   }
 
@@ -83,7 +89,7 @@ function App() {
     // Otherwise search by query
     if (!query.trim()) return;
     try {
-      setIsLoading(true);
+      //setIsLoading(true);
       setError(null);
       const geoRes = await fetch(
         `https://geocoding-api.open-meteo.com/v1/search?name=${query}`
@@ -96,7 +102,7 @@ function App() {
     } catch (err) {
       setError("City not found");
     } finally {
-      setIsLoading(false);
+      //setIsLoading(false);
     }
   }
 
@@ -105,7 +111,7 @@ function App() {
     if (lastCoords) {
       fetchWeather(lastCoords.lat, lastCoords.lon, location);
     }
-  }, [unitSystem]);
+  }, [unitSystem,selectedUnits]);
 
   // Initial load
   useEffect(() => {
@@ -135,7 +141,7 @@ function App() {
               window.location.reload();
             }
           }}
-          isLoading={isLoading}
+          //isLoading={isLoading}
         />
       </>
     );
@@ -148,23 +154,23 @@ function App() {
         <h1>How's the sky looking today?</h1>
         <SearchBar query={query} setQuery={setQuery} onSearch={searchCity} />
         <div className="layout-main">
-          {isLoading && <p>Loading...</p>}
-          {weather && !isLoading && (
+          {/*isLoading && <p>Loading...</p>*/}
+          {weather && (
             <>
             <div className="left-side">
               <CurrentWeather 
                 weather={weather.current_weather} 
-                unitSystem={unitSystem}
+                selectedUnits={selectedUnits}
                 location={location}
                 hourly={weather.hourly}
               />
-              <DailyForecast daily={weather.daily} unitSystem={unitSystem} />
+              <DailyForecast daily={weather.daily} selectedUnits={selectedUnits} />
             </div>
             <div className="right-side">
               <HourlyForecast 
                 hourly={weather.hourly} 
                 daily={weather.daily} 
-                unitSystem={unitSystem} 
+                selectedUnits={selectedUnits}
               />
             </div>
             </>

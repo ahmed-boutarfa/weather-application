@@ -1,22 +1,50 @@
-import { createContext, useState } from "react";
+import { createContext, useState, useMemo } from "react";
 
 export const UnitsContext = createContext();
 
 export function UnitsProvider({ children }) {
-  const [unitSystem, setUnitSystem] = useState("metric");
-  const [selectedUnits, setSelectedUnits] = useState({
-    temperature: "Celsius (°C)",
-    wind: "km/h",
-    precipitation: "Millimeters (mm)",
-  });
+  const [temperatureUnit, setTemperatureUnit] = useState("celsius");
+  const [windspeedUnit, setWindspeedUnit] = useState("kmh");
+  const [precipitationUnit, setPrecipitationUnit] = useState("mm");
+
+  const unitSystem = useMemo(() => {
+    const isMetric =
+      temperatureUnit === "celsius" &&
+      windspeedUnit === "kmh" &&
+      precipitationUnit === "mm";
+    const isImperial =
+      temperatureUnit === "fahrenheit" &&
+      windspeedUnit === "mph" &&
+      precipitationUnit === "inch";
+    if(isMetric)
+      return "metric";
+    else if(isImperial)
+      return "imperial";
+    else
+      return "mixed"
+  }, [temperatureUnit, windspeedUnit, precipitationUnit]);
+  const selectedUnits = useMemo(
+    () => ({
+      temperature: temperatureUnit,
+      wind: windspeedUnit,
+      precipitation: precipitationUnit,
+    }),
+    [temperatureUnit, windspeedUnit, precipitationUnit]
+  );
 
   return (
-    <UnitsContext.Provider value={{ 
-      unitSystem, 
-      setUnitSystem,
-      selectedUnits,
-      setSelectedUnits 
-    }}>
+    <UnitsContext.Provider
+      value={{
+        temperatureUnit,
+        setTemperatureUnit,
+        windspeedUnit,
+        setWindspeedUnit,
+        precipitationUnit,
+        setPrecipitationUnit,
+        unitSystem,
+        selectedUnits,
+      }}
+    >
       {children}
     </UnitsContext.Provider>
   );

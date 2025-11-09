@@ -7,7 +7,15 @@ import icon_dropdown from "../assets/images/icon-dropdown.svg";
 
 function Header() {
   const [open, setOpen] = useState(false);
-  const { unitSystem, setUnitSystem, selectedUnits, setSelectedUnits } = useContext(UnitsContext);
+  const {
+    temperatureUnit,
+    setTemperatureUnit,
+    windspeedUnit,
+    setWindspeedUnit,
+    precipitationUnit,
+    setPrecipitationUnit,
+    unitSystem,
+  } = useContext(UnitsContext);
   const menuRef = useRef(null);
 
   // Close menu when clicking outside
@@ -25,44 +33,50 @@ function Header() {
     {
       title: "Temperature",
       type: "temperature",
-      metric: "Celsius (°C)",
-      imperial: "Fahrenheit (°F)",
+      values: [
+        { label: "Celsius (°C)", key: "celsius" },
+        { label: "Fahrenheit (°F)", key: "fahrenheit" },
+      ],
+      selected: temperatureUnit,
+      setter: setTemperatureUnit,
     },
     {
       title: "Wind Speed",
       type: "wind",
-      metric: "km/h",
-      imperial: "mph",
+      values: [
+        { label: "km/h", key: "kmh" },
+        { label: "mph", key: "mph" },
+      ],
+      selected: windspeedUnit,
+      setter: setWindspeedUnit,
     },
     {
       title: "Precipitation",
       type: "precipitation",
-      metric: "Millimeters (mm)",
-      imperial: "Inches (in)",
+      values: [
+        { label: "Millimeters (mm)", key: "mm" },
+        { label: "Inches (in)", key: "inch" },
+      ],
+      selected: precipitationUnit,
+      setter: setPrecipitationUnit,
     },
   ];
 
   // Toggle full system (global)
   const toggleSystem = () => {
-    setUnitSystem((prev) => {
-      const newSystem = prev === "metric" ? "imperial" : "metric";
-      const updatedUnits = {};
-      options.forEach((opt) => {
-        updatedUnits[opt.type] = opt[newSystem];
-      });
-      setSelectedUnits(updatedUnits);
-      return newSystem;
-    });
+    if (unitSystem === "metric") {
+      // Switch to Imperial
+      setTemperatureUnit("fahrenheit");
+      setWindspeedUnit("mph");
+      setPrecipitationUnit("inch");
+    } else {
+      // Switch to Metric
+      setTemperatureUnit("celsius");
+      setWindspeedUnit("kmh");
+      setPrecipitationUnit("mm");
+    }
   };
-
-  // Select one unit manually (local only)
-  const handleSelect = (type, value) => {
-    setSelectedUnits((prev) => ({
-      ...prev,
-      [type]: value,
-    }));
-  };
-
+  
   return (
     <header className="header">
       <div className="header__logo">
@@ -86,28 +100,21 @@ function Header() {
               <div className="header__group" key={i}>
                 <p className="header__group-title">{opt.title}</p>
                 <ul className="header__options">
-                  <li
-                    className={`option-item ${
-                      selectedUnits[opt.type] === opt.metric ? "active" : ""
-                    }`}
-                    onClick={() => handleSelect(opt.type, opt.metric)}
-                  >
-                    {opt.metric}
-                    {selectedUnits[opt.type] === opt.metric && (
-                      <span className="tick">✓</span>
-                    )}
-                  </li>
-                  <li
-                    className={`option-item ${
-                      selectedUnits[opt.type] === opt.imperial ? "active" : ""
-                    }`}
-                    onClick={() => handleSelect(opt.type, opt.imperial)}
-                  >
-                    {opt.imperial}
-                    {selectedUnits[opt.type] === opt.imperial && (
-                      <span className="tick">✓</span>
-                    )}
-                  </li>
+                  {opt.values.map((val) => (
+                    <li
+                      key={val.key}
+                      className={`option-item ${
+                        opt.selected === val.key ? "active" : ""
+                      }`}
+                      onClick={() => opt.setter(val.key)}
+                    >
+                      
+                      {val.label}
+                      {opt.selected === val.key && (
+                        <span className="tick">✓</span>
+                      )}
+                    </li>
+                  ))}
                 </ul>
               </div>
             ))}

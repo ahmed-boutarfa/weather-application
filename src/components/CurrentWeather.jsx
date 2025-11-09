@@ -1,7 +1,7 @@
 import './current-weather.css'
 import getWeatherIcon from './get-weather-icon';
 
-export default function CurrentWeather({ weather, unitSystem, location, hourly }) {
+export default function CurrentWeather({ weather, selectedUnits, location, hourly }) {
   if (!weather || !hourly) {
     return <p>Loading current weather...</p>;
   }
@@ -14,9 +14,9 @@ export default function CurrentWeather({ weather, unitSystem, location, hourly }
     time 
   } = weather;
 
-  const tempUnit = unitSystem === "metric" ? "°C" : "°F";
-  const windUnit = unitSystem === "metric" ? "km/h" : "mph";
-  const percUnit = unitSystem === "metric" ? "mm" : "in";
+  const tempUnit = selectedUnits.temperature === 'celsius' ? '°C' : '°F';
+  const windUnit = selectedUnits.wind;
+  const percUnit = selectedUnits.precipitation;
 
   // Get current hour index
   const currentTime = new Date(time).toISOString().slice(0, 13) + ":00";

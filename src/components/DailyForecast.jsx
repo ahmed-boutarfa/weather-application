@@ -1,11 +1,10 @@
 import './daily-forecast.css';
 import getWeatherIcon from './get-weather-icon';
 
-export default function DailyForecast({ daily, unitSystem }) {
+export default function DailyForecast({ daily, selectedUnits }) {
   if (!daily) return null;
 
-  const tempUnit = unitSystem === "metric" ? "°C" : "°F";
-
+  const tempUnit = selectedUnits.temperature === "celsius" ? "°C" : "°F";
   return (
     <section className="daily-forecast">
       <h2>Daily forecast</h2>
